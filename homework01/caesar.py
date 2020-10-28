@@ -14,7 +14,7 @@ def encrypt_caesar(plaintext: str, shift: int = 3) -> str:
     >>> encrypt_caesar("")
     ''
     """
-    ciphertext = ""
+    plaintext = ""
     # PUT YOUR CODE HERE
     for i in plaintext:
         ucode = ord(i)
@@ -38,7 +38,7 @@ def decrypt_caesar(ciphertext: str, shift: int = 3) -> str:
     >>> decrypt_caesar("")
     ''
     """
-    plaintext = ""
+    ciphertext = ""
     # PUT YOUR CODE HERE
     for i in ciphertext :
         ucode = ord(i)
