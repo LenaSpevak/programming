@@ -47,12 +47,12 @@ def decrypt_vigenere(ciphertext: str, keyword: str) -> str:
         keyword +=keyword
         key_lenght = len(keyword)
         if key_lenght > text_lenght:
-            keyword = keyword[:text_lenght]world
+            keyword = keyword[:text_lenght]
             key_lenght = len(keyword)
     code_key = [ord(i) for i in key]
     code_text = [ord(n) for n in ciphertext]
     plaintext = ''
     for u in range (len(code_text)):
-        value = (code_text[u] - code_key[u % key lenght] + 26) % 26
+        value = (code_text[u] - code_key[u % key_lenght] + 26) % 26
         plaintext += chr(value +65)
     return plaintext
