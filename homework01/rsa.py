@@ -14,16 +14,11 @@ def is_prime(n: int) -> bool:
     False
     """
     # PUT YOUR CODE HERE
-    if n <= 1 :
-        return False
-    if n <= 3 :
-        return True
-    con = int( math.sqrt(n))
-    for i in range(2, con++):
-        if n % i == 0:
+     for i in range(2, n-1):
+        if (n % i) == 0:
             return False
-    return True
-
+    else:
+        return True
     pass
 
 
@@ -37,15 +32,14 @@ def gcd(a: int, b: int) -> int:
     1
     """
     # PUT YOUR CODE HERE
-    if a == 0:
-        return b
-    elif b ==0:
-        return a
-    while (a != b) and (a != 0) and (b != 0):
-        if a > b:
-            a = a - b
-        else:
-            b = b-a
+    if a < b:
+        c = a
+        a = b
+        b = c
+    while b != 0 :
+        c = b
+        b = a % b
+        a = c
     return a
 
     pass
@@ -53,8 +47,7 @@ def gcd(a: int, b: int) -> int:
 
 def multiplicative_inverse(e: int, phi: int) -> int:
     """
-    a = 0
-    b = 1 
+  
     Euclid's extended algorithm for finding the multiplicative
     inverse of two numbers.
 
@@ -62,17 +55,11 @@ def multiplicative_inverse(e: int, phi: int) -> int:
     23
     """
     # PUT YOUR CODE HERE
-    j = []
-    while e != 0:
-        j.append((e, phi))
-        t = e
-        e = phi % e
-        phi = t 
-    while len(j) != 0:
-        s = a
-        a = (b - (phi // e) * a)
-        b = s
-    return ((a + phi) % phi)
+    if e == 0:
+        return (phi, 0, 1)
+    else:
+        div, x, y = multiplicative_inverse(phi % e, e)
+    return (div, y - (phi // e) * x, x)
     pass
 
 
@@ -100,6 +87,9 @@ def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[in
 
     # Use Extended Euclid's Algorithm to generate the private key
     d = multiplicative_inverse(e, phi)
+    d = d[2]
+    if d < 0:
+        d += phi
 
     # Return public and private keypair
     # Public key is (e, n) and private key is (d, n)
