@@ -19,7 +19,7 @@ def encrypt_vigenere(plaintext: str, keyword: str) -> str:
         if key_lenght > text_lenght:
             keyword = keyword[:text_lenght]
             key_lenght = len(keyword)
-    code_key = [ord(i) for i in key]
+    code_key = [ord(i) for i in key_lenght]
     code_text = [ord(n) for n in plaintext]
     ciphertext = ''
     for u in range(len(code_text)):
@@ -49,7 +49,7 @@ def decrypt_vigenere(ciphertext: str, keyword: str) -> str:
         if key_lenght > text_lenght:
             keyword = keyword[:text_lenght]
             key_lenght = len(keyword)
-    code_key = [ord(i) for i in key]
+    code_key = [ord(i) for i in key_lenght]
     code_text = [ord(n) for n in ciphertext]
     plaintext = ''
     for u in range (len(code_text)):
