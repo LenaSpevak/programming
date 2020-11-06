@@ -9,7 +9,7 @@ def encrypt_vigenere(plaintext: str, keyword: str) -> str:
     >>> encrypt_vigenere("ATTACKATDAWN", "LEMON")
     'LXFOPVEFRNHR'
     """
-    plaintext = ""
+    ciphertext = ""
     # PUT YOUR CODE HERE
     key_lenght = len(keyword)
     text_lenght = len(plaintext)
@@ -19,12 +19,29 @@ def encrypt_vigenere(plaintext: str, keyword: str) -> str:
         if key_lenght > text_lenght:
             keyword = keyword[:text_lenght]
             key_lenght = len(keyword)
-    code_key = [ord(i) for i in key_lenght]
-    code_text = [ord(n) for n in plaintext]
-    ciphertext = ''
-    for u in range(len(code_text)):
-        value = (code_text[u] + code_key[u % key_lenght]) % 26
-        ciphertext += chr(value + 65)
+    code_key = []
+    ord_A = ord('A')
+    ord_a = ord('a')
+    if plaintext.islower():
+        for i in range(key_lenght):
+            code_key.append(ord(keyword[i]) - ord_a)
+        code_text = []
+        for n in range(text_lenght):
+            code_text.append(ord(plaintext[n]) - ord_a)
+        ciphertext = ''
+        for u in range(len(plaintext)):
+            value = (code_key[u] + code_text[u] ) % 26 + ord_a
+            ciphertext += chr(value)
+    else:
+        for i in range(key_lenght):
+            code_key.append(ord(keyword[i]) - ord_A)
+        code_text = []
+        for n in range(text_lenght):
+            code_text.append(ord(plaintext[n]) - ord_A)
+        ciphertext = ''
+        for u in range(len(plaintext)):
+            value = (code_key[u] + code_text[u] ) % 26 + ord_A
+            ciphertext += chr(value)
     return ciphertext
 
 
@@ -39,20 +56,38 @@ def decrypt_vigenere(ciphertext: str, keyword: str) -> str:
     >>> decrypt_vigenere("LXFOPVEFRNHR", "LEMON")
     'ATTACKATDAWN'
     """
-    ciphertext = ""
+    plaintext = ""
     # PUT YOUR CODE HERE
     key_lenght = len(keyword)
     text_lenght = len(ciphertext)
+    
     while key_lenght != text_lenght:
         keyword +=keyword
         key_lenght = len(keyword)
         if key_lenght > text_lenght:
             keyword = keyword[:text_lenght]
             key_lenght = len(keyword)
-    code_key = [ord(i) for i in key_lenght]
-    code_text = [ord(n) for n in ciphertext]
-    plaintext = ''
-    for u in range (len(code_text)):
-        value = (code_text[u] - code_key[u % key_lenght] + 26) % 26
-        plaintext += chr(value +65)
+    code_key = [] 
+    ord_a = ord('a')
+    ord_A = ord('A')
+
+    if ciphertext.islower():
+        for i in range(key_lenght):
+            code_key.append(ord(keyword[i]) - ord_a)
+        code_text = []
+        for n in range(text_lenght):
+            code_text.append(ord(ciphertext[n]) - ord_a)
+        for u in range(text_lenght):
+            value = ((code_text[u] - code_key[u] + 26) % 26) + ord_a
+            plaintext += chr(value)
+    else:
+        for i in range(key_lenght):
+            code_key.append(ord(keyword[i]) - ord_A)
+        code_text = []
+        for n in range(text_lenght):
+            code_text.append(ord(ciphertext[n]) - ord_A)
+        for u in range(text_lenght):
+            value = ((code_text[u] - code_key[u] + 26) % 26) + ord_A
+            plaintext += chr(value)
+    
     return plaintext
