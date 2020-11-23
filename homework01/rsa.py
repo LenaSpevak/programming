@@ -14,12 +14,18 @@ def is_prime(n: int) -> bool:
     False
     """
     # PUT YOUR CODE HERE
-     for i in range(2, n-1):
-        if (n % i) == 0:
-            return False
-    else:
+    import math
+    if n < 2:
+        return False
+    elif n == 2:
         return True
-    pass
+    i = 2
+    limits = int(math.sqrt(n))
+    while i <= limits:
+        if n % i == 0:
+            return False
+        i +=1
+    return True
 
 
 def gcd(a: int, b: int) -> int:
@@ -55,12 +61,15 @@ def multiplicative_inverse(e: int, phi: int) -> int:
     23
     """
     # PUT YOUR CODE HERE
-    if e == 0:
-        return (phi, 0, 1)
-    else:
-        div, x, y = multiplicative_inverse(phi % e, e)
-    return (div, y - (phi // e) * x, x)
-    pass
+    def gcdex(a, b):
+        if b == 0:
+            return a, 1, 0
+        else:
+            div, x, y = gcdex(b, a % b)
+            return div, y, x - y * (a // b)
+
+    div, x, y = gcdex(e, phi)
+    return x % phi 
 
 
 def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[int, int]]:
@@ -87,9 +96,7 @@ def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[in
 
     # Use Extended Euclid's Algorithm to generate the private key
     d = multiplicative_inverse(e, phi)
-    d = d[2]
-    if d < 0:
-        d += phi
+    
 
     # Return public and private keypair
     # Public key is (e, n) and private key is (d, n)
