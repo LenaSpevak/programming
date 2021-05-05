@@ -6,6 +6,7 @@ import struct
 import typing as tp
 
 from pyvcs.objects import hash_object
+from pyvcs.repo import repo_find
 
 
 class GitIndexEntry(tp.NamedTuple):
@@ -26,19 +27,75 @@ class GitIndexEntry(tp.NamedTuple):
 
     def pack(self) -> bytes:
         # PUT YOUR CODE HERE
-        ...
-
+        fmt = "IIIIIIIIII" + "20sh" + str(len(self.name)) + "s"
+        packed = struc.pack(fmt, self.ctime_s, self.ctime)n, self.mtime_s, self.mtime_n,self.dev, self.ino, self.mode, self.uid, self.gid, self.size, self.sha1, self.flafs, self.name.encode())
+        return packed + b"\x00\x00\x00"
+    
     @staticmethod
     def unpack(data: bytes) -> "GitIndexEntry":
         # PUT YOUR CODE HERE
-        ...
+        entry = {}
+        size = struct.calcsize("I")
+        entry['ctime_s'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['ctime_n'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['mtime_s'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['mtime_n'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['dev'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['ino'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['mode'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['uid'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['gid'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['size'] = struct.unpack("!I", data[:size])[0]
+        data = data[size:]
+        entry['sha1'] = struct.unpack("!20s", data[:struct.calcsize("20s")])[0]
+        data = data[struct.calcsize("20s"):]
+        entry['flags'] = struct.unpack("!H", data[:struct.calcsize("H")])[0]
+        name_len = entry['flags'] & 0xFFF
+        entry['name'] = struct.unpack(f"!{name_len}s", data[:struct.calcsize(f"{name_len}s")])[0].decode()
+        
+        gitIndexEntry = GitIndexEntry(**entry)
+        
 
 
 def read_index(gitdir: pathlib.Path) -> tp.List[GitIndexEntry]:
     # PUT YOUR CODE HERE
-    ...
+    repo = repo_find() / "index"
+    entries = []
+    if repo.exists():
+        with open(repo, "rb") as f:
+            _ = f.read(8)
+            num_entries = struct.unpack("!I", f.read(4))[0]
+            for entry in range(num_entries):
+                indexEntry = {}
 
-
+                indexEntry['ctime_s'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['ctime_n'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['mtime_s'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['mtime_n'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['dev'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['ino'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['mode'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['uid'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['gid'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['size'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
+                indexEntry['sha1'] = struct.unpack("!20s", f.read(struct.calcsize("20s")))[0]
+                indexEntry['flags'] = struct.unpack("!H", f.read(struct.calcsize("H")))[0]
+                name_len = indexEntry['flags'] & 0xFFF
+                indexEntry['name'] = struct.unpack("!" + str(name_len) + "s", f.read(struct.calcsize("!" + str(name_len) + "s")))[0]
+                entry_len = 62 + name_len
+                pad_len = (8-(entry_len % 8)) or 8
+                _ = f.read(pad_len)
+     return entries
+                                            
 def write_index(gitdir: pathlib.Path, entries: tp.List[GitIndexEntry]) -> None:
     # PUT YOUR CODE HERE
     ...
@@ -46,7 +103,20 @@ def write_index(gitdir: pathlib.Path, entries: tp.List[GitIndexEntry]) -> None:
 
 def ls_files(gitdir: pathlib.Path, details: bool = False) -> None:
     # PUT YOUR CODE HERE
-    ...
+    entries = read_index(gitdir)
+    if details:
+        info = []
+        for entry in entries:
+            s = f"{entry.mode} {entry.sha1} 0 {entry.name}"
+            info.append(s)
+        s = "\n".join(info)
+        print s
+    else:
+        names = []
+        for entry in entries:
+            names.append(enrty.name)
+        s = "\n".join(names)
+        print(s)
 
 
 def update_index(gitdir: pathlib.Path, paths: tp.List[pathlib.Path], write: bool = True) -> None:
