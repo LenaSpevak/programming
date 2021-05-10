@@ -27,7 +27,7 @@ class GitIndexEntry(tp.NamedTuple):
 
     def pack(self) -> bytes:
         # PUT YOUR CODE HERE
-        fmt = "IIIIIIIIII" + "20sh" + str(len(self.name)) + "s"
+        fmt = "10I" + "20sh" + str(len(self.name)) + "s"
         packed = struct.pack(fmt, self.ctime_s, self.ctime_n, self.mtime_s, self.mtime_n,self.dev, self.ino, self.mode, self.uid, self.gid, self.size, self.sha1, self.flafs, self.name.encode())
         return packed + b"\x00\x00\x00"
     
@@ -65,7 +65,7 @@ class GitIndexEntry(tp.NamedTuple):
         gitindexentry = GitIndexEntry(**entry)
         return gitindexentry
 
-
+#список объектов в индексе
 def read_index(gitdir: pathlib.Path) -> tp.List[GitIndexEntry]:
     # PUT YOUR CODE HERE
     repo = repo_find() / "index"
@@ -133,7 +133,7 @@ def ls_files(gitdir: pathlib.Path, details: bool = False) -> None:
 
 def update_index(gitdir: pathlib.Path, paths: tp.List[pathlib.Path], write: bool = True) -> None:
     # PUT YOUR CODE HERE
-    entries = []
+    entries = read_index(gitdir)
     for path in paths:
         stat = path.stat()
         with open(path, "rb") as f:
