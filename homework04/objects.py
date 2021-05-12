@@ -62,18 +62,17 @@ def read_object(sha: str, gitdir: pathlib.Path) -> tp.Tuple[str, bytes]:
     with open(path / sha[2:], "rb") as f:
         store = f.read()
         store = zlib.decompress(store)
-        store = store.decode() # получить utf-строку из байтовой 
-        header = store[:store.find("\0") + 1]
-        data = store[store.find("\0") + 1:].encode()
+        #store = store.decode() # получить utf-строку из байтовой
+        header = store[:store.find(b"\0") + 1]
+        data = store[store.find(b"\0") + 1:].encode()
 
-    fmt = header[:header.find(" ")]
-    
+    fmt = (header[:header.find(b" ")]).decode()
     return (fmt, data)
 
 
 def read_tree(data: bytes) -> tp.List[tp.Tuple[int, str, str]]:
     # PUT YOUR CODE HERE
-    ...
+
 
 
 def cat_file(obj_name: str, pretty: bool = True) -> None:
@@ -90,8 +89,14 @@ def cat_file(obj_name: str, pretty: bool = True) -> None:
 
 def find_tree_files(tree_sha: str, gitdir: pathlib.Path) -> tp.List[tp.Tuple[str, str]]:
     # PUT YOUR CODE HERE
-    ...
-
+    tree_data = read_object(tree_sha, gitdir)[1]
+    while tree_data != b"":
+        mode = tree_data[tree_data.find(b" ") + 1:]
+        name = tree_data[:tree_data.find("\0")]
+        tree_data = tree_data[tree_data.find("\0") +1:]
+        sha1 = bytes.hex(tree_data[:20])
+        tree_data = tree_data[20:]
+        tree_files.append((name.decode(), sha1.decode()))
 
 def commit_parse(raw: bytes, start: int = 0, dct=None):
     # PUT YOUR CODE HERE
