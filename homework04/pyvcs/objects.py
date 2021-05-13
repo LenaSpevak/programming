@@ -22,12 +22,10 @@ def hash_object(data: bytes, fmt: str, write: bool = False) -> str:
         objects = repo / "objects" / hashobj[:2]
         if not objects.exists():
             objects.mkdir()
-            
         with open(hashobj[2:], "wb") as f:
             compressed = zlib.compress(store)
             f.write(compressed)   
-    return hashobj   
-
+    return hashobj
 
 
 def resolve_object(obj_name: str, gitdir: pathlib.Path) -> tp.List[str]:

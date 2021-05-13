@@ -29,7 +29,8 @@ class GitIndexEntry(tp.NamedTuple):
         # PUT YOUR CODE HERE
         fmt = "10I" + "20sh" + str(len(self.name)) + "s"
         packed = struct.pack(fmt, self.ctime_s, self.ctime_n, self.mtime_s, self.mtime_n,self.dev, self.ino, self.mode, self.uid, self.gid, self.size, self.sha1, self.flafs, self.name.encode())
-        return packed + b"\x00\x00\x00"
+        packed += b"\x00\x00\x00"
+        return packed
     
     @staticmethod
     def unpack(data: bytes) -> "GitIndexEntry":
@@ -62,10 +63,9 @@ class GitIndexEntry(tp.NamedTuple):
         name_len = entry['flags'] & 0xFFF
         entry['name'] = struct.unpack(f"!{name_len}s", data[:struct.calcsize(f"{name_len}s")])[0].decode()
         
-        gitindexentry = GitIndexEntry(**entry)
-        return gitindexentry
+        GIE = GitIndexEntry(**entry)# как сделать иначе распаковку словаря
+        return GIE
 
-#список объектов в индексе
 def read_index(gitdir: pathlib.Path) -> tp.List[GitIndexEntry]:
     # PUT YOUR CODE HERE
     repo = repo_find() / "index"
@@ -76,7 +76,6 @@ def read_index(gitdir: pathlib.Path) -> tp.List[GitIndexEntry]:
             num_entries = struct.unpack("!I", f.read(4))[0]
             for entry in range(num_entries):
                 indexEntry = {}
-
                 indexEntry['ctime_s'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
                 indexEntry['ctime_n'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
                 indexEntry['mtime_s'] = struct.unpack("!I", f.read(struct.calcsize("I")))[0]
@@ -91,25 +90,22 @@ def read_index(gitdir: pathlib.Path) -> tp.List[GitIndexEntry]:
                 indexEntry['flags'] = struct.unpack("!H", f.read(struct.calcsize("H")))[0]
                 name_len = indexEntry['flags'] & 0xFFF
                 indexEntry['name'] = struct.unpack("!" + str(name_len) + "s", f.read(struct.calcsize("!" + str(name_len) + "s")))[0]
-                #entry_len = 62 + name_len
-                #pad_len = (8-(entry_len % 8)) or 8
+                entries.append(GitIndexEntry(**indexEntry))
                 nuls = 3
                 _ = f.read(nuls)
-    entries.sort(key=lambda x: x.name)
+    entries.sort(key=lambda x: x.name) # сортировка по имени
     return entries
                                             
 def write_index(gitdir: pathlib.Path, entries: tp.List[GitIndexEntry]) -> None:
     # PUT YOUR CODE HERE
     git = gitdir / "index"
     fmt = "!ssssII"
-    index = struct.pack(fmt, "DIRC", 2, len(entries))
-
+    index = struct.pack(fmt, b"DIRC", 2, len(entries))
     for entry in entries:
         packed = entry .pack()
         index += packed
-
     index += bytes.fromhex(hashlib.sha1(index).hedigest())
-    with open (git, "bw") as f:
+    with open(git, "bw") as f:
         f.write(index)
 
 
@@ -117,12 +113,12 @@ def ls_files(gitdir: pathlib.Path, details: bool = False) -> None:
     # PUT YOUR CODE HERE
     entries = read_index(gitdir)
     if details:
-        info = []
+        inf = []
         for entry in entries:
             s = f"{oct(entry.mode)[2:]} {bytes.hex(entry.sha1)} 0\t{entry.name}"
-            info.append(s)
-        s = "\n".join(info)
-        print (s)
+            inf.append(s)
+        s = "\n".join(inf)
+        print(s)
     else:
         names = []
         for entry in entries:

@@ -12,8 +12,10 @@ def repo_find(workdir: tp.Union[str, pathlib.Path] = ".") -> pathlib.Path:
         if (workdir / environ).exists():
             return workdir / environ
         workdir = workdir.parent
-    return workdir / environ
-
+    if (workdir / environ).exist():
+        return workdir / environ
+    else:
+        raise Exception("Not a git repository")
 
 
 def repo_create(workdir: tp.Union[str, pathlib.Path]) -> pathlib.Path:
@@ -28,21 +30,27 @@ def repo_create(workdir: tp.Union[str, pathlib.Path]) -> pathlib.Path:
     if not gitdir.exist():
         gitdir.mkdir()
 
-    refs = gitdir / "refs"
-    refs.mkdir()
-    heads = refs / "heads"
-    heads.mkdir()
-    tags = refs / "tags"
-    tags.mkdir()
-    objects = gitdir / "objects"
-    objects.mkdir()
+        refs = gitdir / "refs"
+        refs.mkdir()
+        heads = refs / "heads"
+        heads.mkdir()
+        tags = refs / "tags"
+        tags.mkdir()
+        objects = gitdir / "objects"
+        objects.mkdir()
 
-    with open(gitdir / "HEAD", "w") as f:
-        f.write("ref : refs/heads/master\n")
-    with open(git_dir / "config", "w") as f:
-        f.write("[core]\n\trepositoryformatversion = 0\n\tfilemode = true\n\tbare = false\n\tlogallrefupdates = false\n")
-    with open(git_dir / "description", "w") as f:
-        f.write("Unnamed pyvcs repository.\n")
+        with open(gitdir / "HEAD", "w") as f:
+            f.write("ref : refs/heads/master\n")
+        with open(gitdir / "config", "w") as f:
+            f.write("[core]\n\trepositoryformatversion = 0\n\tfilemode = true\n\tbare = false\n\tlogallrefupdates = false\n")
+        with open(gitdir / "description", "w") as f:
+            f.write("Unnamed pyvcs repository.\n")
 
     return gitdir
 
+
+
+if __name__ == "__main__":
+    workdir = pathlib.Path(".")
+    gitdir = repo_create(".")
+    print(gitdir) # "./.git"
